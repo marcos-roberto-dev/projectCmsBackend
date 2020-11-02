@@ -12,7 +12,7 @@ usersRouter.post('/', async (request, response) => {
     const user = await createUser.execute({ name, email, password });
     response.json(user);
   } catch (err) {
-    response.status(400).json({ message: err.message });
+    response.status(err.statusCode).json({ message: err.message });
   }
 });
 
