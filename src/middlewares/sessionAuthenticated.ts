@@ -20,22 +20,26 @@ async function sessionAuthenticated(
   const bearerToken = request.headers.authorization;
   const [, token] = bearerToken?.split(' ') as string[];
   const userRepository = getRepository(User);
+  let decodedToken: TokenPayload;
   if (!token) throw new AppError('Token is missing.', 401);
+
   try {
-    const decodedToken = verify(token, authConfig.jwt.secret) as TokenPayload;
-
-    const user = await userRepository.findOne({
-      where: { id: decodedToken.sub },
-    });
-
-    if (!user) throw new AppError('This user not found.');
-    delete user.password;
-    request.user = user;
-
-    return next();
+    decodedToken = verify(token, authConfig.jwt.secret) as TokenPayload;
   } catch {
     throw new AppError('Invalid JWT Token.', 401);
   }
+
+  const user = await userRepository.findOne({
+    where: { id: decodedToken.sub },
+  });
+
+  if (!user) throw new AppError('This user not found.');
+
+  delete user.password;
+
+  request.user = user;
+
+  return next();
 }
 
 export default sessionAuthenticated;

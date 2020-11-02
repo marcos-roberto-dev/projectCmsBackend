@@ -14,6 +14,9 @@ sessionsRouter.post('/', async (request, response) => {
   const createSession = new CreateSessionService();
 
   const { user, token } = await createSession.execute({ email, password });
+
+  delete user.password;
+
   response.json({ user, token });
 });
 
