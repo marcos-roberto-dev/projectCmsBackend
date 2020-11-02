@@ -1,8 +1,10 @@
 import { getRepository } from 'typeorm';
 import { compare } from 'bcryptjs';
+import { sign } from 'jsonwebtoken';
 
 import User from '../models/User';
 import AppError from '../errors/AppError';
+import authConfig from '../config/auth';
 
 interface RequestTDO {
   email: string;
@@ -11,6 +13,7 @@ interface RequestTDO {
 
 interface ResponseTDO {
   user: User;
+  token: string;
 }
 
 class CreateSessionService {
@@ -21,11 +24,16 @@ class CreateSessionService {
 
     if (!user) throw new AppError('This email/password is wrong.');
 
-    const isPasswordValid = await compare(password, user.password);
+    const isPasswordValid = await compare(password, user.password as string);
 
     if (!isPasswordValid) throw new AppError('This email/password is wrong.');
 
-    return { user };
+    const token = sign({}, authConfig.jwt.secret, {
+      expiresIn: authConfig.jwt.expiresIn,
+      subject: user.id,
+    });
+
+    return { user, token };
   }
 }
 
