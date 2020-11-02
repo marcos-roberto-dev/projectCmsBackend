@@ -12,7 +12,7 @@ interface RequestTDO {
 }
 
 interface ResponseTDO {
-  user: User;
+  user: Partial<User>;
   token: string;
 }
 

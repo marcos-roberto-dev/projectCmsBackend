@@ -29,15 +29,15 @@ async function sessionAuthenticated(
     throw new AppError('Invalid JWT Token.', 401);
   }
 
-  const user = await userRepository.findOne({
+  const user = (await userRepository.findOne({
     where: { id: decodedToken.sub },
-  });
+  })) as Partial<User>;
 
   if (!user) throw new AppError('This user not found.');
 
   delete user.password;
 
-  request.user = user;
+  request.user = user as User;
 
   return next();
 }
